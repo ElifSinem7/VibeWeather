@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+
+  # ── Ollama — Llama3 yerel model sunucusu ──────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: vibeweather-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama   # modeller persist olur, her seferinde indirilmez
+    restart: unless-stopped
+    # GPU varsa aşağıdaki satırları aç:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # ── Model çekme (ilk kurulumda bir kez çalışır) ───────────────────────────
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: vibeweather-ollama-init
+    depends_on:
+      - ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: >
+      sh -c "
+        sleep 5 &&
+        ollama pull ${OLLAMA_MODEL:-llama3.1:8b} &&
+        echo 'Model hazır!'
+      "
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    restart: "no"   # sadece bir kez çalışır
+
+  # ── FastAPI Backend ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vibeweather-api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1:8b}
+    volumes:
+      - ./backend/ml_model.pkl:/app/ml_model.pkl
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── React Frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vibeweather-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  ollama_data:    # Llama model dosyaları burada saklanır (~5GB)

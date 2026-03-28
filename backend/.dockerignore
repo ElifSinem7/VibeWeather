@@ -1,0 +1,31 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Geliştirme
+.env
+.env.*
+!.env.example
+*.log
+
+# Veri dosyaları (Docker imajına girmesin, volume ile mount edilir)
+sivas_historical.json
+ml_model.pkl
+
+# Test & lint
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
