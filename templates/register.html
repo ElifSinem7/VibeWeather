@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kayıt Ol | WeatherWise</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+ 
+</head>
+<body>
+
+<div class="scene {% if is_night %}theme-night{% else %}
+theme-day{% endif %} 
+weather-{{ weather }}">
+
+  <div class="float-elem fe1">🌧</div>
+  <div class="float-elem fe2">❄</div>
+  <div class="float-elem fe3">⛅</div>
+  <div class="float-elem fe4">🌪</div>
+
+  <div class="left-panel">
+    <div class="brand">
+      <div class="brand-icon">🌤</div>
+      <div class="brand-name">Weather<span>Wise</span></div>
+    </div>
+
+    <h1 class="hero-headline">
+      Hava durumuna<br><em>göre tarzını</em><br>yarat.
+    </h1>
+
+    <p class="hero-sub">
+      Yerel tahminler ve stiline uygun kombin önerileri ile her zaman hazırlıklı ol.
+    </p>
+
+    <div class="weather-preview">
+      <div class="preview-card active-card">
+        <div class="preview-icon">⛅</div>
+        <div class="preview-info">
+          <div class="city">Sivas</div>
+          <div class="temp">18°</div>
+          <div class="desc">Parçalı Bulutlu</div>
+        </div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-icon">🌧</div>
+        <div class="preview-info">
+          <div class="city">Kayseri</div>
+          <div class="temp">15°</div>
+          <div class="desc">Hafif Yağmurlu</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="form-wrapper">
+
+      <div class="tab-switcher">
+        <a href="{{ url_for('login') }}" style="text-decoration: none; flex: 1;">
+          <button class="tab-btn">Giriş Yap</button>
+        </a>
+        <button class="tab-btn active">Kayıt Ol</button>
+      </div>
+
+      <div class="form-section visible">
+        <div class="form-title">WeatherWise'a Katıl 🌍</div>
+        <div class="form-subtitle">Hava durumu profilini oluştur, tarzını belirle.</div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register">
+          <div class="field-group">
+            <label class="field-label">E-Posta</label>
+            <input class="field-input" type="email" name="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Şifre Belirle</label>
+              <input class="field-input" type="password" name="password" placeholder="••••••••" required>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Şifre Tekrar</label>
+              <input class="field-input" type="password" name="password_confirm" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Hesabımı Oluştur →</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 0.5;
+    s.style.cssText = `
+      left: ${Math.random()*100}%;
+      top: ${Math.random()*100}%;
+      width: ${size}px;
+      height: ${size}px;
+      animation-delay: ${Math.random()*3}s;
+      animation-duration: ${2 + Math.random()*3}s;
+    `;
+    starsEl.appendChild(s);
+  }
+</script>
+
+</body>
+</html>
